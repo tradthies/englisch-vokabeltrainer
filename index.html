@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Englisch-Vokabel-Trainer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .fade-in { animation: fadeIn 0.2s ease-in-out; }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        * { -webkit-tap-highlight-color: transparent; }
+        
+        .custom-checkbox {
+            appearance: none;
+            width: 1.5rem;
+            height: 1.5rem;
+            border: 2px solid #cbd5e1;
+            border-radius: 0.375rem;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            flex-shrink: 0;
+        }
+        .custom-checkbox:checked {
+            background-color: #4f46e5;
+            border-color: #4f46e5;
+        }
+        .custom-checkbox:checked::after {
+            content: '✓';
+            color: white;
+            font-size: 1rem;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-800 h-screen flex flex-col font-sans overflow-hidden">
+
+    <header class="bg-indigo-600 text-white shadow-md z-10 shrink-0">
+        <div class="max-w-md mx-auto flex text-sm sm:text-base">
+            <button id="tab-neu" onclick="switchTab('neu')" class="flex-1 py-4 text-center font-semibold border-b-4 border-transparent hover:bg-indigo-700 transition-colors text-indigo-200">
+                Neu
+            </button>
+            <button id="tab-liste" onclick="switchTab('liste')" class="flex-1 py-4 text-center font-semibold border-b-4 border-transparent hover:bg-indigo-700 transition-colors text-indigo-200">
+                Liste
+            </button>
+            <button id="tab-abfrage" onclick="switchTab('abfrage')" class="flex-1 py-4 text-center font-bold border-b-4 border-white bg-indigo-700 transition-colors">
+                Abfrage
+            </button>
+            <button id="tab-daten" onclick="switchTab('daten')" class="flex-1 py-4 text-center font-semibold border-b-4 border-transparent hover:bg-indigo-700 transition-colors text-indigo-200">
+                Daten
+            </button>
+        </div>
+    </header>
+
+    <main class="flex-1 relative overflow-y-auto w-full max-w-md mx-auto p-4 flex flex-col items-center justify-start sm:justify-center">
+
+        <!-- EINGABE -->
+        <section id="view-neu" class="w-full hidden bg-white p-6 rounded-2xl shadow-lg fade-in">
+            <h2 id="form-title" class="text-xl font-bold text-gray-700 mb-4 border-b pb-2">Neue Vokabel anlegen</h2>
+            <form id="vocab-form" onsubmit="saveVocab(event)" class="flex flex-col gap-4">
+                <input type="text" id="inp-lehrkasten-kasten" placeholder="Lektion" class="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all">
+                <input type="text" id="inp-seite" placeholder="Seite (z.B. 12)" class="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all">
+                <input type="text" id="inp-latein" placeholder="Englisch" required class="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all text-lg font-semibold">
+                <input type="text" id="inp-zusatz" placeholder="Zusatz" class="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all">
+                <input type="text" id="inp-deutsch" placeholder="Deutsch" required class="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all text-lg">
+                <div class="flex gap-2 mt-2">
+                    <button type="button" id="btn-cancel-edit" onclick="cancelEdit()" class="hidden flex-1 bg-gray-400 hover:bg-gray-500 text-white font-bold py-4 rounded-xl shadow-md transition-transform">
+                        Abbrechen
+                    </button>
+                    <button type="submit" id="btn-save" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-4 rounded-xl shadow-md active:scale-95 transition-transform">
+                        Speichern
+                    </button>
+                </div>
+            </form>
+            <div id="save-msg" class="hidden mt-4 text-center text-green-600 font-medium bg-green-50 p-3 rounded-lg">
+                Erfolgreich gespeichert!
+            </div>
+        </section>
+
+        <!-- LISTE -->
+        <section id="view-liste" class="w-full hidden fade-in flex-col h-full">
+            <h2 class="text-xl font-bold text-gray-700 mb-4 bg-white p-4 rounded-xl shadow-sm text-center">Alle Vokabeln</h2>
+            
+            <!-- Suchfeld -->
+            <div class="mb-4">
+                <input type="text" id="search-liste" onkeyup="renderList()" placeholder="Vokabeln suchen..." class="w-full p-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 shadow-sm transition-all">
+            </div>
+
+            <div id="vocab-list-container" class="flex flex-col gap-3 pb-8 overflow-y-auto"></div>
+            <div id="list-empty-state" class="text-center text-gray-500 hidden mt-10">
+                <p>Noch keine Vokabeln vorhanden.</p>
+            </div>
+        </section>
+
+        <!-- ABFRAGE -->
+        <section id="view-abfrage" class="w-full flex fade-in flex-col items-center justify-center h-full">
+            
+            <!-- Filter Selection -->
+            <div id="quiz-filter-view" class="w-full bg-white p-5 rounded-2xl shadow-lg mb-auto mt-4 overflow-y-auto flex-1">
+                <h2 class="text-xl font-bold text-gray-700 mb-4 border-b pb-2">Filter wählen</h2>
+                
+                <div class="flex flex-col gap-4">
+                    <div>
+                        <h3 class="font-semibold text-gray-600 mb-2">Lehrkasten</h3>
+                        <div id="filter-lk-container" class="grid grid-cols-2 gap-2 max-h-[30vh] overflow-y-auto p-1"></div>
+                    </div>
+                    <div class="border-t pt-2">
+                        <h3 class="font-semibold text-gray-600 mb-2">Seite</h3>
+                        <div id="filter-seite-container" class="grid grid-cols-2 gap-2 max-h-[30vh] overflow-y-auto p-1"></div>
+                    </div>
+                </div>
+
+                <p class="text-xs text-gray-500 mt-4 text-center">
+                    Ohne Auswahl werden alle Werte dieser Kategorie abgefragt.
+                </p>
+
+                <button onclick="startFilteredQuiz()" class="mt-4 w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-4 rounded-xl shadow-md active:scale-95 transition-transform">
+                    Abfrage starten
+                </button>
+
+                <div class="mt-3 flex items-stretch gap-2">
+                    <input type="number" id="quiz-count" value="10" min="5" step="5" inputmode="numeric"
+                        class="w-24 text-center text-lg font-semibold border-2 border-gray-200 rounded-xl focus:border-indigo-500 outline-none">
+                    <button onclick="startQuizWithCount()" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-4 rounded-xl shadow-md active:scale-95 transition-transform">
+                        Quiz
+                    </button>
+                </div>
+                <p class="text-xs text-gray-500 mt-2 text-center">Quiz: Zufällige Vokabeln in der angegebenen Anzahl.</p>
+            </div>
+
+            <!-- Flashcard Quiz -->
+            <div id="quiz-card-view" class="w-full hidden flex-col items-center justify-center h-full pb-8">
+                <div class="w-full flex items-center justify-between gap-2">
+                    <button id="btn-prev" onclick="prevCard()" class="p-2 text-indigo-500 hover:bg-indigo-50 rounded-full active:scale-90 transition-all">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg>
+                    </button>
+
+                    <div class="flex-1 max-w-[300px] h-[420px] bg-white rounded-3xl shadow-xl flex flex-col overflow-hidden relative border border-gray-100">
+                        <div class="h-1/2 flex items-center justify-center p-6 bg-slate-50 border-b-2 border-dashed border-gray-200">
+                            <h2 id="card-latein" class="text-3xl font-bold text-gray-800 text-center break-words w-full"></h2>
+                        </div>
+
+                        <div class="h-1/2 relative cursor-pointer group" onclick="revealCard()">
+                            <div id="card-cover" class="absolute inset-0 bg-gray-200 flex items-center justify-center transition-colors z-10">
+                                <span class="text-gray-500 font-medium tracking-wide">Tippen zum Aufdecken</span>
+                            </div>
+                            <div id="card-content" class="absolute inset-0 bg-white flex flex-col items-center justify-center p-6 text-center z-0">
+                                <p id="card-zusatz" class="text-gray-500 italic mb-3 text-lg break-words w-full"></p>
+                                <h3 id="card-deutsch" class="text-indigo-700 font-bold text-2xl break-words w-full"></h3>
+                            </div>
+                        </div>
+
+                        <div class="absolute bottom-3 left-4 text-xs font-semibold text-gray-400 z-20 pointer-events-none">
+                            <span id="card-meta-info"></span>
+                        </div>
+                    </div>
+
+                    <div class="p-2 w-14 shrink-0" aria-hidden="true"></div>
+                </div>
+                
+                <div class="flex gap-3 w-full max-w-[300px] mt-5">
+                    <button onclick="answerCard(false)" class="flex-1 bg-red-500 hover:bg-red-600 text-white font-bold py-3 rounded-xl shadow-md active:scale-95 transition-transform flex items-center justify-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12" /></svg>
+                        Falsch
+                    </button>
+                    <button onclick="answerCard(true)" class="flex-1 bg-green-500 hover:bg-green-600 text-white font-bold py-3 rounded-xl shadow-md active:scale-95 transition-transform flex items-center justify-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" /></svg>
+                        Richtig
+                    </button>
+                </div>
+
+                <div class="flex justify-between items-center w-full max-w-[300px] mt-4 px-2">
+                    <button onclick="showFilterView()" class="text-sm text-indigo-600 font-medium hover:underline">Filter ändern</button>
+                    <div id="counter" class="text-sm font-medium text-gray-400 text-center"></div>
+                </div>
+            </div>
+
+            <!-- Quiz fertig -->
+            <div id="quiz-done-view" class="w-full max-w-[320px] hidden flex-col items-center bg-white p-6 rounded-2xl shadow-lg text-center gap-4">
+                <div class="text-5xl">🎉</div>
+                <h2 class="text-xl font-bold text-gray-700">Geschafft!</h2>
+                <p id="quiz-done-text" class="text-gray-600"></p>
+                <button onclick="restartQuizSet()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 rounded-xl active:scale-95 transition-transform">Nochmal von vorne</button>
+                <button onclick="showFilterView()" class="text-sm text-indigo-600 font-medium hover:underline">Filter ändern</button>
+            </div>
+
+            <div id="empty-state" class="text-center text-gray-500 hidden mt-10">
+                <p class="text-lg">Keine Vokabeln vorhanden.</p>
+                <p class="text-sm mt-2">Gehe zu "Neu" und füge welche hinzu.</p>
+            </div>
+        </section>
+
+        <!-- DATEN -->
+        <section id="view-daten" class="w-full hidden fade-in bg-white p-6 rounded-2xl shadow-lg mt-4 overflow-y-auto h-auto mb-auto">
+            <h2 class="text-xl font-bold text-gray-700 mb-6 text-center">Datenverwaltung</h2>
+            <div class="flex flex-col gap-6">
+                <!-- CSV Import -->
+                <div class="bg-blue-50 p-4 rounded-xl border border-blue-200">
+                    <h3 class="font-semibold text-blue-800 mb-2">CSV Massen-Import</h3>
+                    <p class="text-sm text-blue-600 mb-3">
+                        <strong>5 Spalten erwartet:</strong><br>
+                        1. Lektion<br>2. Seite<br>3. Englisch<br>4. Zusatz<br>5. Deutsch
+                    </p>
+                    <input type="file" id="csv-upload" accept=".csv" class="hidden" onchange="importCSV(event)">
+                    <button onclick="document.getElementById('csv-upload').click()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg flex items-center justify-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                        CSV auswählen
+                    </button>
+                </div>
+
+                <!-- Export -->
+                <div class="bg-gray-50 p-4 rounded-xl border border-gray-200">
+                    <h3 class="font-semibold text-gray-700 mb-2">JSON Backup (Export)</h3>
+                    <button onclick="exportJSON()" class="w-full bg-slate-800 hover:bg-slate-900 text-white font-bold py-3 rounded-lg flex items-center justify-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
+                        Exportieren
+                    </button>
+                </div>
+
+                <!-- JSON Import -->
+                <div class="bg-gray-50 p-4 rounded-xl border border-gray-200">
+                    <h3 class="font-semibold text-gray-700 mb-2">JSON Backup laden</h3>
+                    <input type="file" id="json-upload" accept=".json" class="hidden" onchange="importJSON(event)">
+                    <button onclick="document.getElementById('json-upload').click()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-lg flex items-center justify-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" /></svg>
+                        JSON auswählen
+                    </button>
+                </div>
+
+                <!-- Alle löschen -->
+                <div class="bg-red-50 p-4 rounded-xl border border-red-200">
+                    <h3 class="font-semibold text-red-800 mb-2">Alle Einträge löschen</h3>
+                    <button onclick="deleteAllVocabs()" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 rounded-lg flex items-center justify-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                        Alles löschen
+                    </button>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        const STORAGE_KEY = 'EnglischVocabs';
+        let vocabList = [];
+        let filteredVocabs = [];
+        let currentIndex = 0;
+        let editingIndex = -1; 
+
+        function loadData() {
+            try {
+                const data = localStorage.getItem(STORAGE_KEY);
+                if (data) {
+                    let parsedData = JSON.parse(data);
+                    vocabList = parsedData.map(v => {
+                        if (!v.hasOwnProperty('seite')) { v.seite = ''; }
+                        return v;
+                    });
+                }
+            } catch (e) {
+                console.error("Fehler beim Laden", e);
+                vocabList = [];
+            }
+        }
+
+        function saveData() { localStorage.setItem(STORAGE_KEY, JSON.stringify(vocabList)); }
+
+        function switchTab(tabName) {
+            ['neu', 'liste', 'abfrage', 'daten'].forEach(tab => {
+                const view = document.getElementById('view-' + tab);
+                const btn = document.getElementById('tab-' + tab);
+                if (tab === tabName) {
+                    view.classList.remove('hidden');
+                    if (tab === 'abfrage' || tab === 'liste') view.classList.add('flex');
+                    btn.classList.add('font-bold', 'border-white', 'bg-indigo-700', 'text-white');
+                    btn.classList.remove('font-semibold', 'border-transparent', 'text-indigo-200');
+                } else {
+                    view.classList.add('hidden');
+                    if (tab === 'abfrage' || tab === 'liste') view.classList.remove('flex');
+                    btn.classList.remove('font-bold', 'border-white', 'bg-indigo-700', 'text-white');
+                    btn.classList.add('font-semibold', 'border-transparent', 'text-indigo-200');
+                }
+            });
+            if (tabName === 'liste') {
+                const searchInput = document.getElementById('search-liste');
+                if(searchInput) searchInput.value = ''; // Reset search on tab switch
+                renderList();
+            }
+            if (tabName === 'abfrage') initAbfrageTab();
+            if (tabName === 'neu' && editingIndex === -1) resetForm();
+        }
+
+        function saveVocab(event) {
+            event.preventDefault();
+            const lk = document.getElementById('inp-lehrkasten-kasten').value.trim();
+            const se = document.getElementById('inp-seite').value.trim();
+            const lat = document.getElementById('inp-latein').value.trim();
+            const zus = document.getElementById('inp-zusatz').value.trim();
+            const deu = document.getElementById('inp-deutsch').value.trim();
+
+            if (!lat || !deu) return;
+            const newVocab = { lehrkastenKasten: lk, seite: se, latein: lat, zusatz: zus, deutsch: deu };
+
+            if (editingIndex > -1) {
+                vocabList[editingIndex] = newVocab;
+                editingIndex = -1; 
+                switchTab('liste'); 
+            } else {
+                vocabList.push(newVocab);
+                document.getElementById('inp-latein').value = '';
+                document.getElementById('inp-zusatz').value = '';
+                document.getElementById('inp-deutsch').value = '';
+                document.getElementById('inp-latein').focus();
+                
+                const msg = document.getElementById('save-msg');
+                msg.classList.remove('hidden');
+                setTimeout(() => msg.classList.add('hidden'), 2000);
+            }
+            saveData();
+        }
+
+        function resetForm() {
+            editingIndex = -1;
+            document.getElementById('form-title').textContent = "Neue Vokabel anlegen";
+            document.getElementById('btn-save').textContent = "Speichern";
+            document.getElementById('btn-cancel-edit').classList.add('hidden');
+            if(document.getElementById('view-neu').classList.contains('hidden')) {
+                document.getElementById('inp-latein').value = '';
+                document.getElementById('inp-zusatz').value = '';
+                document.getElementById('inp-deutsch').value = '';
+            }
+        }
+
+        function cancelEdit() {
+            resetForm();
+            document.getElementById('inp-lehrkasten-kasten').value = '';
+            document.getElementById('inp-seite').value = '';
+            switchTab('liste');
+        }
+
+        function renderList() {
+            const container = document.getElementById('vocab-list-container');
+            const emptyState = document.getElementById('list-empty-state');
+            const searchInput = document.getElementById('search-liste');
+            const searchTerm = searchInput ? searchInput.value.toLowerCase() : '';
+            
+            container.innerHTML = '';
+            
+            if (vocabList.length === 0) {
+                emptyState.classList.remove('hidden');
+                emptyState.innerHTML = '<p>Noch keine Vokabeln vorhanden.</p>';
+                if(searchInput) searchInput.parentElement.style.display = 'none';
+                return;
+            }
+            
+            if(searchInput) searchInput.parentElement.style.display = 'block';
+
+            const displayList = vocabList.filter(v => {
+                if(!searchTerm) return true;
+                return (v.latein.toLowerCase().includes(searchTerm) ||
+                        v.deutsch.toLowerCase().includes(searchTerm) ||
+                        v.zusatz.toLowerCase().includes(searchTerm) ||
+                        (v.lehrkastenKasten || '').toLowerCase().includes(searchTerm) ||
+                        (v.seite || '').toLowerCase().includes(searchTerm));
+            });
+
+            if (displayList.length === 0) {
+                emptyState.classList.remove('hidden');
+                emptyState.innerHTML = '<p>Keine passenden Vokabeln gefunden.</p>';
+                return;
+            }
+            
+            emptyState.classList.add('hidden');
+            
+            displayList.forEach((v) => {
+                const idx = vocabList.indexOf(v); // preserve original index for actions
+                const item = document.createElement('div');
+                item.className = 'bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex flex-col gap-2';
+                let metaArr = [];
+                if(v.lehrkastenKasten) metaArr.push(v.lehrkastenKasten);
+                if(v.seite) metaArr.push("S. " + v.seite);
+                let metaText = metaArr.length > 0 ? metaArr.join(", ") : "Ohne Zuweisung";
+                item.innerHTML = `
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <div class="font-bold text-lg text-indigo-900">${v.latein}</div>
+                            <div class="text-sm text-gray-600 italic">${v.zusatz}</div>
+                            <div class="text-md text-gray-800 mt-1">${v.deutsch}</div>
+                        </div>
+                        <div class="flex gap-2">
+                            <button onclick="editVocab(${idx})" class="text-blue-500 hover:text-blue-700 bg-blue-50 p-2 rounded-lg">✏️</button>
+                            <button onclick="deleteVocab(${idx})" class="text-red-500 hover:text-red-700 bg-red-50 p-2 rounded-lg">🗑️</button>
+                        </div>
+                    </div>
+                    <div class="text-xs text-gray-400 mt-2 border-t pt-2">${metaText}</div>
+                `;
+                container.appendChild(item);
+            });
+        }
+
+        function deleteVocab(index) {
+            if (confirm("Vokabel wirklich löschen?")) {
+                vocabList.splice(index, 1);
+                saveData();
+                renderList();
+            }
+        }
+
+        function deleteAllVocabs() {
+            if (vocabList.length === 0) return;
+            if (!confirm(`Wirklich ALLE ${vocabList.length} Vokabeln unwiderruflich löschen?`)) return;
+            vocabList = [];
+            saveData();
+            renderList();
+            alert("Alle Einträge gelöscht.");
+        }
+
+        function editVocab(index) {
+            editingIndex = index;
+            const v = vocabList[index];
+            document.getElementById('inp-lehrkasten-kasten').value = v.lehrkastenKasten || '';
+            document.getElementById('inp-seite').value = v.seite || '';
+            document.getElementById('inp-latein').value = v.latein;
+            document.getElementById('inp-zusatz').value = v.zusatz;
+            document.getElementById('inp-deutsch').value = v.deutsch;
+            document.getElementById('form-title').textContent = "Vokabel bearbeiten";
+            document.getElementById('btn-save').textContent = "Aktualisieren";
+            document.getElementById('btn-cancel-edit').classList.remove('hidden');
+            switchTab('neu');
+        }
+
+        function initAbfrageTab() {
+            const filterView = document.getElementById('quiz-filter-view');
+            const cardView = document.getElementById('quiz-card-view');
+            const emptyState = document.getElementById('empty-state');
+            if (vocabList.length === 0) {
+                filterView.classList.add('hidden');
+                cardView.classList.add('hidden');
+                emptyState.classList.remove('hidden');
+            } else {
+                emptyState.classList.add('hidden');
+                cardView.classList.add('hidden');
+                document.getElementById('quiz-done-view').classList.add('hidden');
+                filterView.classList.remove('hidden');
+                buildFilterCheckboxes();
+            }
+        }
+
+        function showFilterView() {
+            document.getElementById('quiz-card-view').classList.add('hidden');
+            document.getElementById('quiz-done-view').classList.add('hidden');
+            document.getElementById('quiz-done-view').classList.remove('flex');
+            document.getElementById('quiz-filter-view').classList.remove('hidden');
+        }
+
+        function buildFilterCheckboxes() {
+            const lkContainer = document.getElementById('filter-lk-container');
+            const seiteContainer = document.getElementById('filter-seite-container');
+            lkContainer.innerHTML = ''; seiteContainer.innerHTML = '';
+
+            const setLK = new Set();
+            const setSeite = new Set();
+
+            vocabList.forEach(v => {
+                setLK.add(v.lehrkastenKasten ? v.lehrkastenKasten.trim() : "Ohne Zuweisung");
+                setSeite.add(v.seite ? v.seite.trim() : "Ohne Seite");
+            });
+
+            const createCb = (val, cssClass) => `
+                <label class="flex items-center gap-2 p-2 hover:bg-gray-50 bg-white rounded-lg cursor-pointer border border-gray-200 shadow-sm overflow-hidden" title="${val}">
+                    <input type="checkbox" class="custom-checkbox ${cssClass} scale-90" value="${val}" checked>
+                    <span class="text-sm text-gray-700 font-medium truncate ${val.startsWith('Ohne') ? 'italic text-gray-400' : ''}">${val}</span>
+                </label>
+            `;
+
+            Array.from(setLK).sort().forEach(val => lkContainer.innerHTML += createCb(val, 'filter-cb-lk'));
+            Array.from(setSeite).sort((a,b) => a.localeCompare(b, undefined, {numeric: true})).forEach(val => seiteContainer.innerHTML += createCb(val, 'filter-cb-seite'));
+        }
+
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        let quizSet = [];       
+        let quizResults = [];   
+        let quizRound = 1;
+
+        function getFilteredVocabs() {
+            const checkedLKs = Array.from(document.querySelectorAll('.filter-cb-lk:checked')).map(cb => cb.value);
+            const checkedSeiten = Array.from(document.querySelectorAll('.filter-cb-seite:checked')).map(cb => cb.value);
+
+            return vocabList.filter(v => {
+                const lk = v.lehrkastenKasten ? v.lehrkastenKasten.trim() : "Ohne Zuweisung";
+                const seite = v.seite ? v.seite.trim() : "Ohne Seite";
+                const matchLK = checkedLKs.length === 0 || checkedLKs.includes(lk);
+                const matchSeite = checkedSeiten.length === 0 || checkedSeiten.includes(seite);
+                return matchLK && matchSeite;
+            });
+        }
+
+        function startFilteredQuiz() {
+            const list = getFilteredVocabs();
+            if (list.length === 0) { alert("Keine Vokabeln mit dieser Filter-Kombination gefunden."); return; }
+            beginQuiz(shuffleArray([...list]));
+        }
+
+        function startQuizWithCount() {
+            const list = getFilteredVocabs();
+            if (list.length === 0) { alert("Keine Vokabeln mit dieser Filter-Kombination gefunden."); return; }
+            const n = parseInt(document.getElementById('quiz-count').value, 10);
+            if (isNaN(n) || n < 1) { alert("Bitte eine gültige Anzahl eingeben."); return; }
+            const shuffled = shuffleArray([...list]);
+            if (n > shuffled.length) {
+                alert(`Es sind nur ${shuffled.length} Vokabeln verfügbar. Das Quiz startet mit allen.`);
+                beginQuiz(shuffled);
+            } else {
+                beginQuiz(shuffled.slice(0, n));
+            }
+        }
+
+        function beginQuiz(set) {
+            quizSet = set;
+            restartQuizSet();
+        }
+
+        function restartQuizSet() {
+            filteredVocabs = shuffleArray([...quizSet]);
+            quizRound = 1;
+            startRound();
+            document.getElementById('quiz-filter-view').classList.add('hidden');
+            document.getElementById('quiz-done-view').classList.add('hidden');
+            document.getElementById('quiz-done-view').classList.remove('flex');
+            document.getElementById('quiz-card-view').classList.remove('hidden');
+            document.getElementById('quiz-card-view').classList.add('flex');
+            renderCard();
+        }
+
+        function startRound() {
+            currentIndex = 0;
+            quizResults = new Array(filteredVocabs.length).fill(null);
+        }
+
+        function answerCard(correct) {
+            quizResults[currentIndex] = correct ? 'r' : 'f';
+            if (currentIndex < filteredVocabs.length - 1) {
+                currentIndex++;
+                renderCard();
+                return;
+            }
+            const wrong = filteredVocabs.filter((v, i) => quizResults[i] === 'f');
+            if (wrong.length === 0) {
+                showQuizDone();
+            } else {
+                filteredVocabs = shuffleArray(wrong);
+                quizRound++;
+                startRound();
+                renderCard();
+            }
+        }
+
+        function showQuizDone() {
+            document.getElementById('quiz-card-view').classList.add('hidden');
+            document.getElementById('quiz-card-view').classList.remove('flex');
+            const done = document.getElementById('quiz-done-view');
+            done.classList.remove('hidden');
+            done.classList.add('flex');
+            document.getElementById('quiz-done-text').textContent =
+                `Alle ${quizSet.length} Vokabeln richtig beantwortet – nach ${quizRound} ${quizRound === 1 ? 'Runde' : 'Runden'}.`;
+        }
+
+        function renderCard() {
+            const v = filteredVocabs[currentIndex];
+            document.getElementById('card-latein').textContent = v.latein;
+            document.getElementById('card-zusatz').textContent = v.zusatz;
+            document.getElementById('card-deutsch').textContent = v.deutsch;
+            let metaArr = [];
+            if (v.lehrkastenKasten) metaArr.push(v.lehrkastenKasten);
+            if (v.seite) metaArr.push("S. " + v.seite);
+            document.getElementById('card-meta-info').textContent = metaArr.length > 0 ? metaArr.join(", ") : "";
+            document.getElementById('counter').textContent =
+                `${quizRound > 1 ? 'Runde ' + quizRound + ' · ' : ''}${currentIndex + 1} / ${filteredVocabs.length}`;
+            document.getElementById('btn-prev').style.visibility = currentIndex > 0 ? 'visible' : 'hidden';
+            document.getElementById('card-cover').style.display = 'flex'; 
+        }
+
+        function revealCard() { document.getElementById('card-cover').style.display = 'none'; }
+        function prevCard() { if (currentIndex > 0) { currentIndex--; renderCard(); } }
+
+        function exportJSON() {
+            if (vocabList.length === 0) { alert("Keine Daten vorhanden."); return; }
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(vocabList, null, 2));
+            const dlAnchorElem = document.createElement('a');
+            dlAnchorElem.setAttribute("href", dataStr);
+            dlAnchorElem.setAttribute("download", `vokabeln_${new Date().toISOString().split('T')[0]}.json`);
+            document.body.appendChild(dlAnchorElem);
+            dlAnchorElem.click();
+            document.body.removeChild(dlAnchorElem);
+        }
+
+        function vocabKey(v) {
+            const n = x => (x || '').toString().trim().toLowerCase().replace(/\s+/g, ' ');
+            return n(v.latein) + '|' + n(v.zusatz) + '|' + n(v.deutsch);
+        }
+
+        function importJSON(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const importedData = JSON.parse(e.target.result);
+                    if (Array.isArray(importedData)) {
+                        const msg = vocabList.length > 0
+                            ? `Achtung: Die aktuelle Liste (${vocabList.length} Vokabeln) wird durch das Backup (${importedData.length} Vokabeln) ersetzt. Fortfahren?`
+                            : `Backup mit ${importedData.length} Vokabeln laden?`;
+                        if (!confirm(msg)) {
+                            document.getElementById('json-upload').value = '';
+                            return;
+                        }
+                        vocabList = importedData.map(v => {
+                            if(!v.hasOwnProperty('seite')) v.seite = '';
+                            return v;
+                        });
+                        saveData();
+                        alert("Backup erfolgreich geladen!");
+                        document.getElementById('json-upload').value = '';
+                    }
+                } catch (error) {
+                    alert("Fehler beim Lesen. Ist es eine gültige JSON-Datei?");
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        function importCSV(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const text = e.target.result;
+                const lines = text.split(/\r?\n/).filter(line => line.trim() !== "");
+                if (lines.length === 0) return alert("Die Datei ist leer.");
+
+                const delimiter = text.includes(';') ? ';' : ',';
+                let importCount = 0;
+                let dupCount = 0;
+                const seen = new Set(vocabList.map(vocabKey));
+
+                lines.forEach((line, index) => {
+                    const cols = line.split(delimiter).map(c => c.trim().replace(/^"|"$/g, ''));
+                    if (index === 0 && cols.length > 2 && cols[2].toLowerCase().includes('latein')) return;
+                    if (cols.length >= 5 || cols.length >= 3) { 
+                        const entry = {
+                            lehrkastenKasten: cols[0] || '',
+                            seite: cols[1] || '',
+                            latein: cols[2] || '',
+                            zusatz: cols[3] || '',
+                            deutsch: cols[4] || ''
+                        };
+                        const key = vocabKey(entry);
+                        if (seen.has(key)) { dupCount++; return; }
+                        seen.add(key);
+                        vocabList.push(entry);
+                        importCount++;
+                    }
+                });
+                if (importCount > 0) {
+                    saveData();
+                    alert(`${importCount} Vokabeln hinzugefügt, ${dupCount} Duplikate übersprungen.`);
+                } else if (dupCount > 0) {
+                    alert(`Keine neuen Vokabeln: ${dupCount} Duplikate übersprungen.`);
+                } else {
+                    alert("Keine gültigen Zeilen gefunden.");
+                }
+                document.getElementById('csv-upload').value = '';
+            };
+            reader.readAsText(file);
+        }
+
+        window.onload = () => {
+            loadData();
+            switchTab('abfrage');
+        };
+    </script>
+</body>
+</html>
