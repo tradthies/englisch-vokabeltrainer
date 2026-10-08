@@ -104,9 +104,15 @@
             <div id="quiz-filter-view" class="w-full bg-white p-5 rounded-2xl shadow-lg mb-auto mt-4 overflow-y-auto flex-1">
                 <h2 class="text-xl font-bold text-gray-700 mb-4 border-b pb-2">Filter wählen</h2>
                 
+                <!-- NEU: Alle an-/abwählen -->
+                <div class="flex gap-2 mb-4">
+                    <button onclick="toggleAllFilters(true)" class="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-medium py-2 rounded-lg border border-gray-200 transition-colors">Alle anwählen</button>
+                    <button onclick="toggleAllFilters(false)" class="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-medium py-2 rounded-lg border border-gray-200 transition-colors">Alle abwählen</button>
+                </div>
+
                 <div class="flex flex-col gap-4">
                     <div>
-                        <h3 class="font-semibold text-gray-600 mb-2">Lehrkasten</h3>
+                        <h3 class="font-semibold text-gray-600 mb-2">Lektion</h3>
                         <div id="filter-lk-container" class="grid grid-cols-2 gap-2 max-h-[30vh] overflow-y-auto p-1"></div>
                     </div>
                     <div class="border-t pt-2">
@@ -118,6 +124,15 @@
                 <p class="text-xs text-gray-500 mt-4 text-center">
                     Ohne Auswahl werden alle Werte dieser Kategorie abgefragt.
                 </p>
+
+                <!-- Abfragerichtung -->
+                <div class="mt-4 border-t pt-4">
+                    <h3 class="font-semibold text-gray-600 mb-2">Abfragerichtung</h3>
+                    <select id="quiz-direction" class="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all font-medium text-gray-700">
+                        <option value="en-de">Englisch ➔ Deutsch</option>
+                        <option value="de-en">Deutsch ➔ Englisch</option>
+                    </select>
+                </div>
 
                 <button onclick="startFilteredQuiz()" class="mt-4 w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-4 rounded-xl shadow-md active:scale-95 transition-transform">
                     Abfrage starten
@@ -250,6 +265,7 @@
         let filteredVocabs = [];
         let currentIndex = 0;
         let editingIndex = -1; 
+        let currentQuizDirection = 'en-de';
 
         function loadData() {
             try {
@@ -287,7 +303,7 @@
             });
             if (tabName === 'liste') {
                 const searchInput = document.getElementById('search-liste');
-                if(searchInput) searchInput.value = ''; // Reset search on tab switch
+                if(searchInput) searchInput.value = ''; 
                 renderList();
             }
             if (tabName === 'abfrage') initAbfrageTab();
@@ -377,7 +393,7 @@
             emptyState.classList.add('hidden');
             
             displayList.forEach((v) => {
-                const idx = vocabList.indexOf(v); // preserve original index for actions
+                const idx = vocabList.indexOf(v); 
                 const item = document.createElement('div');
                 item.className = 'bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex flex-col gap-2';
                 let metaArr = [];
@@ -481,6 +497,13 @@
             Array.from(setSeite).sort((a,b) => a.localeCompare(b, undefined, {numeric: true})).forEach(val => seiteContainer.innerHTML += createCb(val, 'filter-cb-seite'));
         }
 
+        // NEU: Funktion zum An-/Abwählen aller Checkboxen
+        function toggleAllFilters(state) {
+            document.querySelectorAll('.custom-checkbox').forEach(cb => {
+                cb.checked = state;
+            });
+        }
+
         function shuffleArray(array) {
             for (let i = array.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
@@ -527,6 +550,7 @@
         }
 
         function beginQuiz(set) {
+            currentQuizDirection = document.getElementById('quiz-direction').value;
             quizSet = set;
             restartQuizSet();
         }
@@ -578,9 +602,17 @@
 
         function renderCard() {
             const v = filteredVocabs[currentIndex];
-            document.getElementById('card-latein').textContent = v.latein;
+            
+            if (currentQuizDirection === 'de-en') {
+                document.getElementById('card-latein').textContent = v.deutsch;
+                document.getElementById('card-deutsch').textContent = v.latein;
+            } else {
+                document.getElementById('card-latein').textContent = v.latein;
+                document.getElementById('card-deutsch').textContent = v.deutsch;
+            }
+            
             document.getElementById('card-zusatz').textContent = v.zusatz;
-            document.getElementById('card-deutsch').textContent = v.deutsch;
+            
             let metaArr = [];
             if (v.lehrkastenKasten) metaArr.push(v.lehrkastenKasten);
             if (v.seite) metaArr.push("S. " + v.seite);
@@ -656,7 +688,7 @@
 
                 lines.forEach((line, index) => {
                     const cols = line.split(delimiter).map(c => c.trim().replace(/^"|"$/g, ''));
-                    if (index === 0 && cols.length > 2 && cols[2].toLowerCase().includes('latein')) return;
+                    if (index === 0 && cols.length > 2 && (cols[2].toLowerCase().includes('latein') || cols[2].toLowerCase().includes('englisch'))) return;
                     if (cols.length >= 5 || cols.length >= 3) { 
                         const entry = {
                             lehrkastenKasten: cols[0] || '',
