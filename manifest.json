@@ -2,7 +2,7 @@
   "id": "vokabeltrainer-englisch-unique",
   "name": "MM Vokabel Trainer Englisch",
   "short_name": "Englisch",
-  "start_url": "./indexEnglisch.html",
+  "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#f3f4f6",
   "theme_color": "#4f46e5",
