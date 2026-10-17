@@ -21,7 +21,6 @@
         }
     </script>
 
-
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         .fade-in { animation: fadeIn 0.2s ease-in-out; }
@@ -60,18 +59,11 @@
 
     <header class="bg-indigo-600 text-white shadow-md z-10 shrink-0">
         <div class="max-w-md mx-auto flex text-sm sm:text-base">
-            <button id="tab-neu" onclick="switchTab('neu')" class="flex-1 py-4 text-center font-semibold border-b-4 border-transparent hover:bg-indigo-700 transition-colors text-indigo-200">
-                Neu
-            </button>
-            <button id="tab-liste" onclick="switchTab('liste')" class="flex-1 py-4 text-center font-semibold border-b-4 border-transparent hover:bg-indigo-700 transition-colors text-indigo-200">
-                Liste
-            </button>
-            <button id="tab-abfrage" onclick="switchTab('abfrage')" class="flex-1 py-4 text-center font-bold border-b-4 border-white bg-indigo-700 transition-colors">
-                Abfrage
-            </button>
-            <button id="tab-daten" onclick="switchTab('daten')" class="flex-1 py-4 text-center font-semibold border-b-4 border-transparent hover:bg-indigo-700 transition-colors text-indigo-200">
-                Daten
-            </button>
+            <button id="tab-neu" onclick="switchTab('neu')" class="flex-1 py-4 text-center font-semibold border-b-4 border-transparent hover:bg-indigo-700 transition-colors text-indigo-200">Neu</button>
+            <button id="tab-liste" onclick="switchTab('liste')" class="flex-1 py-4 text-center font-semibold border-b-4 border-transparent hover:bg-indigo-700 transition-colors text-indigo-200">Liste</button>
+            <button id="tab-abfrage" onclick="switchTab('abfrage')" class="flex-1 py-4 text-center font-bold border-b-4 border-white bg-indigo-700 transition-colors">Abfrage</button>
+            <button id="tab-erfolge" onclick="switchTab('erfolge')" class="flex-1 py-4 text-center font-semibold border-b-4 border-transparent hover:bg-indigo-700 transition-colors text-indigo-200">Erfolge</button>
+            <button id="tab-daten" onclick="switchTab('daten')" class="flex-1 py-4 text-center font-semibold border-b-4 border-transparent hover:bg-indigo-700 transition-colors text-indigo-200">Daten</button>
         </div>
     </header>
 
@@ -87,17 +79,11 @@
                 <input type="text" id="inp-zusatz" placeholder="Zusatz" class="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all">
                 <input type="text" id="inp-deutsch" placeholder="Deutsch" required class="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all text-lg">
                 <div class="flex gap-2 mt-2">
-                    <button type="button" id="btn-cancel-edit" onclick="cancelEdit()" class="hidden flex-1 bg-gray-400 hover:bg-gray-500 text-white font-bold py-4 rounded-xl shadow-md transition-transform">
-                        Abbrechen
-                    </button>
-                    <button type="submit" id="btn-save" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-4 rounded-xl shadow-md active:scale-95 transition-transform">
-                        Speichern
-                    </button>
+                    <button type="button" id="btn-cancel-edit" onclick="cancelEdit()" class="hidden flex-1 bg-gray-400 hover:bg-gray-500 text-white font-bold py-4 rounded-xl shadow-md transition-transform">Abbrechen</button>
+                    <button type="submit" id="btn-save" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-4 rounded-xl shadow-md active:scale-95 transition-transform">Speichern</button>
                 </div>
             </form>
-            <div id="save-msg" class="hidden mt-4 text-center text-green-600 font-medium bg-green-50 p-3 rounded-lg">
-                Erfolgreich gespeichert!
-            </div>
+            <div id="save-msg" class="hidden mt-4 text-center text-green-600 font-medium bg-green-50 p-3 rounded-lg">Erfolgreich gespeichert!</div>
         </section>
 
         <!-- LISTE -->
@@ -107,19 +93,16 @@
                 <input type="text" id="search-liste" onkeyup="renderList()" placeholder="Vokabeln suchen..." class="w-full p-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 shadow-sm transition-all">
             </div>
             <div id="vocab-list-container" class="flex flex-col gap-3 pb-8 overflow-y-auto"></div>
-            <div id="list-empty-state" class="text-center text-gray-500 hidden mt-10">
-                <p>Noch keine Vokabeln vorhanden.</p>
-            </div>
+            <div id="list-empty-state" class="text-center text-gray-500 hidden mt-10"><p>Noch keine Vokabeln vorhanden.</p></div>
         </section>
 
         <!-- ABFRAGE -->
         <section id="view-abfrage" class="w-full flex fade-in flex-col items-center justify-center h-full">
             
             <!-- Filter Selection -->
-            <div id="quiz-filter-view" class="w-full bg-white p-4 rounded-2xl shadow-lg mb-auto mt-2 overflow-y-auto flex-1">
+            <div id="quiz-filter-view" class="w-full bg-white p-4 rounded-2xl shadow-lg mb-auto mt-2 overflow-y-auto flex-1 flex flex-col">
                 <h2 class="text-lg font-bold text-gray-700 mb-3 border-b pb-1">Filter wählen</h2>
                 
-                <!-- Alle an-/abwählen -->
                 <div class="flex gap-2 mb-3">
                     <button onclick="toggleAllFilters(true)" class="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-semibold py-1.5 rounded-lg border border-gray-200 transition-colors">Alle anwählen</button>
                     <button onclick="toggleAllFilters(false)" class="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-semibold py-1.5 rounded-lg border border-gray-200 transition-colors">Alle abwählen</button>
@@ -129,20 +112,19 @@
                     <div>
                         <div class="flex justify-between items-center mb-1">
                             <h3 class="font-semibold text-gray-600 text-sm">Lektionen</h3>
-                            <!-- NEU: Suchfeld für Lektionen -->
                             <input type="text" id="search-filter-lk" onkeyup="filterLektionCheckboxes()" placeholder="Suchen (z.B. U2)..." class="text-xs px-2 py-1 bg-gray-50 border border-gray-200 rounded-lg w-28 focus:outline-none focus:ring-1 focus:ring-indigo-500">
                         </div>
-                        <div id="filter-lk-container" class="grid grid-cols-3 gap-1.5 max-h-[20vh] overflow-y-auto p-1 bg-gray-50 rounded-xl border border-gray-100"></div>
+                        <div id="filter-lk-container" class="grid grid-cols-3 gap-1.5 max-h-[16vh] overflow-y-auto p-1 bg-gray-50 rounded-xl border border-gray-100"></div>
                     </div>
 
                     <div class="border-t pt-2">
                         <h3 class="font-semibold text-gray-600 text-sm mb-1">Seiten</h3>
-                        <div id="filter-seite-container" class="grid grid-cols-3 gap-1.5 max-h-[18vh] overflow-y-auto p-1 bg-gray-50 rounded-xl border border-gray-100"></div>
+                        <div id="filter-seite-container" class="grid grid-cols-3 gap-1.5 max-h-[16vh] overflow-y-auto p-1 bg-gray-50 rounded-xl border border-gray-100"></div>
                     </div>
                 </div>
 
                 <!-- Abfragerichtung -->
-                <div class="mt-3 border-t pt-2">
+                <div class="mt-3 border-t pt-2 mb-1">
                     <h3 class="font-semibold text-gray-600 text-xs mb-1">Abfragerichtung</h3>
                     <select id="quiz-direction" class="w-full p-2 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 text-xs font-medium text-gray-700">
                         <option value="en-de">Englisch ➔ Deutsch</option>
@@ -150,16 +132,31 @@
                     </select>
                 </div>
 
-                <button onclick="startFilteredQuiz()" class="mt-3 w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 rounded-xl shadow-md active:scale-95 transition-transform text-sm">
-                    Abfrage starten
-                </button>
+                <!-- STEUERUNG: Zähler und Buttons nebeneinander -->
+                <div class="mt-auto pt-3 flex gap-3 items-stretch">
+                    
+                    <!-- Linke Spalte: Zähler & Eingabe -->
+                    <div class="w-24 flex flex-col items-center justify-between shrink-0 bg-indigo-50 border border-indigo-100 rounded-xl p-2 shadow-sm">
+                        <div class="flex flex-col items-center mt-1">
+                            <span id="live-filter-count" class="text-3xl font-bold text-indigo-700 leading-none">0</span>
+                        </div>
+                        
+                        <span class="text-[10px] text-indigo-400 uppercase tracking-widest my-1.5 font-semibold">davon</span>
+                        
+                        <input type="number" id="quiz-count" value="10" min="5" step="5" inputmode="numeric"
+                            class="w-full text-center text-lg font-bold border-2 border-indigo-200 bg-white rounded-lg focus:border-indigo-500 outline-none py-1.5 text-gray-700">
+                    </div>
 
-                <div class="mt-2 flex items-stretch gap-2">
-                    <input type="number" id="quiz-count" value="10" min="5" step="5" inputmode="numeric"
-                        class="w-20 text-center text-base font-semibold border-2 border-gray-200 rounded-xl focus:border-indigo-500 outline-none">
-                    <button onclick="startQuizWithCount()" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-xl shadow-md active:scale-95 transition-transform text-sm">
-                        Quiz (Zufall)
-                    </button>
+                    <!-- Rechte Spalte: Buttons -->
+                    <div class="flex-1 flex flex-col gap-3">
+                        <button onclick="startFilteredQuiz()" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl shadow-md active:scale-95 transition-transform text-sm">
+                            Abfrage starten
+                        </button>
+                        <button onclick="startQuizWithCount()" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-md active:scale-95 transition-transform text-sm">
+                            Quiz (Zufall)
+                        </button>
+                    </div>
+
                 </div>
             </div>
 
@@ -170,7 +167,7 @@
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg>
                     </button>
 
-                    <div class="flex-1 max-w-[300px] h-[420px] bg-white rounded-3xl shadow-xl flex flex-col overflow-hidden relative border border-gray-100">
+                    <div class="flex-1 max-w-[300px] h-[400px] bg-white rounded-3xl shadow-xl flex flex-col overflow-hidden relative border border-gray-100">
                         <div class="h-1/2 flex items-center justify-center p-6 bg-slate-50 border-b-2 border-dashed border-gray-200">
                             <h2 id="card-latein" class="text-3xl font-bold text-gray-800 text-center break-words w-full"></h2>
                         </div>
@@ -184,12 +181,10 @@
                                 <h3 id="card-deutsch" class="text-indigo-700 font-bold text-2xl break-words w-full"></h3>
                             </div>
                         </div>
-
                         <div class="absolute bottom-3 left-4 text-xs font-semibold text-gray-400 z-20 pointer-events-none">
                             <span id="card-meta-info"></span>
                         </div>
                     </div>
-
                     <div class="p-2 w-14 shrink-0" aria-hidden="true"></div>
                 </div>
                 
@@ -204,9 +199,12 @@
                     </button>
                 </div>
 
-                <div class="flex justify-between items-center w-full max-w-[300px] mt-4 px-2">
-                    <button onclick="showFilterView()" class="text-sm text-indigo-600 font-medium hover:underline">Filter ändern</button>
-                    <div id="counter" class="text-sm font-medium text-gray-400 text-center"></div>
+                <div class="flex flex-col items-center w-full max-w-[300px] mt-6 gap-3">
+                    <div id="counter" class="text-sm font-medium text-gray-500 text-center"></div>
+                    <button onclick="showFilterView()" class="w-full bg-red-50 border border-red-200 text-red-600 hover:bg-red-100 font-bold py-3 rounded-xl active:scale-95 transition-colors text-sm flex justify-center items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                        Abbrechen
+                    </button>
                 </div>
             </div>
 
@@ -216,12 +214,29 @@
                 <h2 class="text-xl font-bold text-gray-700">Geschafft!</h2>
                 <p id="quiz-done-text" class="text-gray-600"></p>
                 <button onclick="restartQuizSet()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 rounded-xl active:scale-95 transition-transform">Nochmal von vorne</button>
-                <button onclick="showFilterView()" class="text-sm text-indigo-600 font-medium hover:underline">Filter ändern</button>
+                <button onclick="showFilterView()" class="w-full bg-gray-100 text-gray-700 hover:bg-gray-200 font-bold py-3 rounded-xl transition-colors mt-2">Zurück zur Auswahl</button>
             </div>
 
             <div id="empty-state" class="text-center text-gray-500 hidden mt-10">
                 <p class="text-lg">Keine Vokabeln vorhanden.</p>
                 <p class="text-sm mt-2">Gehe zu "Neu" und füge welche hinzu.</p>
+            </div>
+        </section>
+
+        <!-- ERFOLGE -->
+        <section id="view-erfolge" class="w-full hidden fade-in flex-col h-full bg-white p-6 rounded-2xl shadow-lg mt-2 mb-auto">
+            <h2 class="text-xl font-bold text-gray-700 mb-6 text-center">Erfolge & Historie</h2>
+            <div class="bg-indigo-50 p-4 rounded-xl border border-indigo-200 flex-1 flex flex-col">
+                <div class="flex justify-between items-start mb-3">
+                    <div>
+                        <h3 class="font-semibold text-indigo-900">Abgeschlossene Abfragen</h3>
+                        <p class="text-xs text-indigo-700 mt-0.5">Letzte 50 Erfolge</p>
+                    </div>
+                    <button onclick="clearHistory()" class="text-xs text-red-500 hover:underline mt-1">Verlauf löschen</button>
+                </div>
+                <div id="history-container" class="flex flex-col gap-2 overflow-y-auto text-sm text-indigo-800 bg-white rounded-lg p-3 border border-indigo-100 flex-1 min-h-[40vh]">
+                    <!-- Einträge werden per JS geladen -->
+                </div>
             </div>
         </section>
 
@@ -232,28 +247,57 @@
                 <div class="bg-blue-50 p-4 rounded-xl border border-blue-200">
                     <h3 class="font-semibold text-blue-800 mb-2">CSV Massen-Import</h3>
                     <input type="file" id="csv-upload" accept=".csv" class="hidden" onchange="importCSV(event)">
-                    <button onclick="document.getElementById('csv-upload').click()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg flex items-center justify-center gap-2">CSV auswählen</button>
+                    <button onclick="document.getElementById('csv-upload').click()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg">CSV auswählen</button>
                 </div>
                 <div class="bg-gray-50 p-4 rounded-xl border border-gray-200">
                     <h3 class="font-semibold text-gray-700 mb-2">JSON Backup (Export)</h3>
-                    <button onclick="exportJSON()" class="w-full bg-slate-800 hover:bg-slate-900 text-white font-bold py-3 rounded-lg flex items-center justify-center gap-2">Exportieren</button>
+                    <button onclick="exportJSON()" class="w-full bg-slate-800 hover:bg-slate-900 text-white font-bold py-3 rounded-lg">Exportieren</button>
                 </div>
                 <div class="bg-gray-50 p-4 rounded-xl border border-gray-200">
                     <h3 class="font-semibold text-gray-700 mb-2">JSON Backup laden</h3>
                     <input type="file" id="json-upload" accept=".json" class="hidden" onchange="importJSON(event)">
-                    <button onclick="document.getElementById('json-upload').click()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-lg flex items-center justify-center gap-2">JSON auswählen</button>
+                    <button onclick="document.getElementById('json-upload').click()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-lg">JSON auswählen</button>
                 </div>
                 <div class="bg-red-50 p-4 rounded-xl border border-red-200">
                     <h3 class="font-semibold text-red-800 mb-2">Alle Einträge löschen</h3>
-                    <button onclick="deleteAllVocabs()" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 rounded-lg flex items-center justify-center gap-2">Alles löschen</button>
+                    <button onclick="deleteAllVocabs()" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 rounded-lg">Alles löschen</button>
                 </div>
             </div>
         </section>
     </main>
 
+    <!-- IMPORT INFO MODAL -->
+    <div id="import-modal" class="fixed inset-0 bg-black/60 hidden z-50 flex items-center justify-center p-4 fade-in">
+        <div class="bg-white rounded-3xl shadow-2xl w-full max-w-sm max-h-[80vh] flex flex-col overflow-hidden">
+            <div class="p-5 border-b border-gray-100 bg-gray-50 flex justify-between items-center">
+                <h3 class="text-lg font-bold text-gray-800">Import-Ergebnis</h3>
+            </div>
+            
+            <div class="p-5 overflow-y-auto flex-1">
+                <p id="import-summary" class="font-bold text-gray-700 mb-4 text-center text-lg"></p>
+                
+                <div id="import-duplicates-section" class="hidden flex-col">
+                    <p class="text-xs font-bold text-red-500 uppercase tracking-wide mb-2">Folgende Duplikate übersprungen:</p>
+                    <ul id="import-duplicates-list" class="text-sm text-gray-600 bg-red-50/50 p-3 rounded-xl border border-red-100 max-h-40 overflow-y-auto flex flex-col gap-1.5">
+                        <!-- Duplikate werden hier per JS eingefügt -->
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="p-4 border-t border-gray-100">
+                <button onclick="document.getElementById('import-modal').classList.add('hidden')" class="w-full bg-gray-800 hover:bg-gray-900 text-white font-bold py-3 rounded-xl active:scale-95 transition-transform">
+                    Schließen
+                </button>
+            </div>
+        </div>
+    </div>
+
     <script>
         const STORAGE_KEY = 'EnglischVocabs';
+        const HISTORY_KEY = 'EnglischHistory';
+        
         let vocabList = [];
+        let historyList = [];
         let filteredVocabs = [];
         let currentIndex = 0;
         let editingIndex = -1; 
@@ -269,23 +313,31 @@
                         return v;
                     });
                 }
-            } catch (e) { vocabList = []; }
+                const hData = localStorage.getItem(HISTORY_KEY);
+                if (hData) historyList = JSON.parse(hData);
+            } catch (e) { 
+                vocabList = []; 
+                historyList = []; 
+            }
         }
 
-        function saveData() { localStorage.setItem(STORAGE_KEY, JSON.stringify(vocabList)); }
+        function saveData() { 
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(vocabList)); 
+            localStorage.setItem(HISTORY_KEY, JSON.stringify(historyList));
+        }
 
         function switchTab(tabName) {
-            ['neu', 'liste', 'abfrage', 'daten'].forEach(tab => {
+            ['neu', 'liste', 'abfrage', 'erfolge', 'daten'].forEach(tab => {
                 const view = document.getElementById('view-' + tab);
                 const btn = document.getElementById('tab-' + tab);
                 if (tab === tabName) {
                     view.classList.remove('hidden');
-                    if (tab === 'abfrage' || tab === 'liste') view.classList.add('flex');
+                    if (tab === 'abfrage' || tab === 'liste' || tab === 'erfolge') view.classList.add('flex');
                     btn.classList.add('font-bold', 'border-white', 'bg-indigo-700', 'text-white');
                     btn.classList.remove('font-semibold', 'border-transparent', 'text-indigo-200');
                 } else {
                     view.classList.add('hidden');
-                    if (tab === 'abfrage' || tab === 'liste') view.classList.remove('flex');
+                    if (tab === 'abfrage' || tab === 'liste' || tab === 'erfolge') view.classList.remove('flex');
                     btn.classList.remove('font-bold', 'border-white', 'bg-indigo-700', 'text-white');
                     btn.classList.add('font-semibold', 'border-transparent', 'text-indigo-200');
                 }
@@ -297,6 +349,30 @@
             }
             if (tabName === 'abfrage') initAbfrageTab();
             if (tabName === 'neu' && editingIndex === -1) resetForm();
+            if (tabName === 'erfolge') renderHistory();
+        }
+
+        function renderHistory() {
+            const container = document.getElementById('history-container');
+            container.innerHTML = '';
+            if (historyList.length === 0) {
+                container.innerHTML = '<div class="text-center italic text-indigo-400 py-4">Noch keine Abfragen beendet.</div>';
+                return;
+            }
+            historyList.forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'border-b border-indigo-100 pb-2 mb-2 last:border-0 last:mb-0 last:pb-0';
+                div.innerHTML = `<span class="font-semibold">${item.date}</span>: ${item.count} Vokabeln in ${item.rounds} Runde(n)`;
+                container.appendChild(div);
+            });
+        }
+
+        function clearHistory() {
+            if(confirm("Lern-Historie wirklich löschen?")) {
+                historyList = [];
+                saveData();
+                renderHistory();
+            }
         }
 
         function saveVocab(event) {
@@ -435,6 +511,11 @@
             switchTab('neu');
         }
 
+        function updateLiveCount() {
+            const count = getFilteredVocabs().length;
+            document.getElementById('live-filter-count').textContent = count;
+        }
+
         function initAbfrageTab() {
             const filterView = document.getElementById('quiz-filter-view');
             const cardView = document.getElementById('quiz-card-view');
@@ -448,16 +529,22 @@
                 cardView.classList.add('hidden');
                 document.getElementById('quiz-done-view').classList.add('hidden');
                 filterView.classList.remove('hidden');
+                filterView.classList.add('flex');
                 document.getElementById('search-filter-lk').value = '';
                 buildFilterCheckboxes();
+                updateLiveCount();
             }
         }
 
         function showFilterView() {
             document.getElementById('quiz-card-view').classList.add('hidden');
+            document.getElementById('quiz-card-view').classList.remove('flex');
             document.getElementById('quiz-done-view').classList.add('hidden');
             document.getElementById('quiz-done-view').classList.remove('flex');
-            document.getElementById('quiz-filter-view').classList.remove('hidden');
+            const filterView = document.getElementById('quiz-filter-view');
+            filterView.classList.remove('hidden');
+            filterView.classList.add('flex');
+            updateLiveCount();
         }
 
         function buildFilterCheckboxes() {
@@ -475,7 +562,7 @@
 
             const createCb = (val, cssClass) => `
                 <label class="flex items-center gap-1.5 p-1.5 hover:bg-white bg-gray-50 rounded-lg cursor-pointer border border-gray-200 overflow-hidden filter-item" data-val="${val.toLowerCase()}" title="${val}">
-                    <input type="checkbox" class="custom-checkbox ${cssClass} scale-75" value="${val}" checked>
+                    <input type="checkbox" onchange="updateLiveCount()" class="custom-checkbox ${cssClass} scale-75" value="${val}" checked>
                     <span class="text-xs text-gray-700 font-medium truncate ${val === 'Ohne' || val === '-' ? 'italic text-gray-400' : ''}">${val}</span>
                 </label>
             `;
@@ -484,7 +571,6 @@
             Array.from(setSeite).sort((a,b) => a.localeCompare(b, undefined, {numeric: true})).forEach(val => seiteContainer.innerHTML += createCb(val, 'filter-cb-seite'));
         }
 
-        // NEU: Live-Suche für Lektionen-Checkboxes
         function filterLektionCheckboxes() {
             const term = document.getElementById('search-filter-lk').value.toLowerCase();
             const items = document.querySelectorAll('#filter-lk-container .filter-item');
@@ -500,12 +586,12 @@
 
         function toggleAllFilters(state) {
             document.querySelectorAll('.custom-checkbox').forEach(cb => {
-                // Nur sichtbare Checkboxen umschalten
                 const label = cb.closest('.filter-item');
                 if (!label || label.style.display !== 'none') {
                     cb.checked = state;
                 }
             });
+            updateLiveCount();
         }
 
         function shuffleArray(array) {
@@ -564,6 +650,7 @@
             quizRound = 1;
             startRound();
             document.getElementById('quiz-filter-view').classList.add('hidden');
+            document.getElementById('quiz-filter-view').classList.remove('flex');
             document.getElementById('quiz-done-view').classList.add('hidden');
             document.getElementById('quiz-done-view').classList.remove('flex');
             document.getElementById('quiz-card-view').classList.remove('hidden');
@@ -602,6 +689,17 @@
             done.classList.add('flex');
             document.getElementById('quiz-done-text').textContent =
                 `Alle ${quizSet.length} Vokabeln richtig beantwortet – nach ${quizRound} ${quizRound === 1 ? 'Runde' : 'Runden'}.`;
+            
+            // In Historie speichern
+            const now = new Date();
+            const dateStr = now.toLocaleDateString('de-DE') + ' ' + now.toLocaleTimeString('de-DE', {hour: '2-digit', minute: '2-digit'});
+            historyList.unshift({
+                date: dateStr,
+                count: quizSet.length,
+                rounds: quizRound
+            });
+            if(historyList.length > 50) historyList.pop(); // Maximal 50 Einträge
+            saveData();
         }
 
         function renderCard() {
@@ -614,6 +712,7 @@
                 document.getElementById('card-deutsch').textContent = v.deutsch;
             }
             document.getElementById('card-zusatz').textContent = v.zusatz;
+            
             let metaArr = [];
             if (v.lehrkastenKasten) metaArr.push(v.lehrkastenKasten);
             if (v.seite) metaArr.push("S. " + v.seite);
@@ -664,6 +763,26 @@
             reader.readAsText(file);
         }
 
+        function showImportReport(added, duplicates) {
+            const modal = document.getElementById('import-modal');
+            const summary = document.getElementById('import-summary');
+            const dupSection = document.getElementById('import-duplicates-section');
+            const dupList = document.getElementById('import-duplicates-list');
+            
+            summary.textContent = `${added} Vokabeln hinzugefügt.`;
+            
+            if (duplicates.length > 0) {
+                dupSection.classList.remove('hidden');
+                dupSection.classList.add('flex');
+                dupList.innerHTML = duplicates.map(d => `<li><span class="font-semibold text-gray-800">${d.latein}</span> &ndash; ${d.deutsch}</li>`).join('');
+            } else {
+                dupSection.classList.add('hidden');
+                dupSection.classList.remove('flex');
+            }
+            
+            modal.classList.remove('hidden');
+        }
+
         function importCSV(event) {
             const file = event.target.files[0];
             if (!file) return;
@@ -672,14 +791,16 @@
                 const text = e.target.result;
                 const lines = text.split(/\r?\n/).filter(line => line.trim() !== "");
                 if (lines.length === 0) return alert("Die Datei ist leer.");
+                
                 const delimiter = text.includes(';') ? ';' : ',';
                 let importCount = 0;
-                let dupCount = 0;
+                let duplicateEntries = [];
                 const seen = new Set(vocabList.map(vocabKey));
 
                 lines.forEach((line, index) => {
                     const cols = line.split(delimiter).map(c => c.trim().replace(/^"|"$/g, ''));
-                    if (index === 0 && cols.length > 2 && cols[2].toLowerCase().includes('englisch')) return;
+                    if (index === 0 && cols.length > 2 && (cols[2].toLowerCase().includes('latein') || cols[2].toLowerCase().includes('englisch'))) return;
+                    
                     if (cols.length >= 3) { 
                         const entry = {
                             lehrkastenKasten: cols[0] || '',
@@ -689,14 +810,20 @@
                             deutsch: cols[4] || ''
                         };
                         const key = vocabKey(entry);
-                        if (seen.has(key)) { dupCount++; return; }
+                        
+                        if (seen.has(key)) { 
+                            duplicateEntries.push(entry); 
+                            return; 
+                        }
+                        
                         seen.add(key);
                         vocabList.push(entry);
                         importCount++;
                     }
                 });
+                
                 if (importCount > 0) saveData();
-                alert(`${importCount} hinzugefügt, ${dupCount} Duplikate übersprungen.`);
+                showImportReport(importCount, duplicateEntries);
                 document.getElementById('csv-upload').value = '';
             };
             reader.readAsText(file);
